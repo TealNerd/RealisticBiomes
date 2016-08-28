@@ -2,6 +2,7 @@ package com.untamedears.realisticbiomes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -43,6 +44,7 @@ protected String name;
 	// this rate overrides all other settings if the plant is under artificial light (adjacent to glowstone)
 	private double greenhouseRate;
 	private boolean isGreenhouseEnabled;
+	private HashSet<Material> ignoreForLight;
 
 	// flag that denotes if this crop's growth is persisted
 	private boolean isPersistent;
@@ -190,6 +192,13 @@ protected String name;
 		if (config.isSet("biomes")) {
 			loadBiomes(config.getConfigurationSection("biomes"), biomeAliases);
 		}
+		
+		if(config.isSet("ignore_for_light")) {
+			ignoreForLight = new HashSet<Material>();
+			for(String type : config.getStringList("ignore_for_light")) {
+				ignoreForLight.add(Material.getMaterial(type));
+			}
+		}
 	}
 	
 	public String getName() {
@@ -214,6 +223,7 @@ protected String name;
 		
 		greenhouseRate = other.greenhouseRate;
 		isGreenhouseEnabled = other.isGreenhouseEnabled;
+		ignoreForLight = other.ignoreForLight;
 		persistentRate = other.persistentRate;
 		
 		needsSunlight = other.needsSunlight;
@@ -320,17 +330,23 @@ protected String name;
 	
 	double sunlightChecks(Block block) {
 		double rate = 1.0;
-		int sunlightIntensity;
-		if (block.getType().isTransparent()) {
-			sunlightIntensity = block.getLightFromSky();
-		} else {
-			sunlightIntensity = block.getRelative(BlockFace.UP).getLightFromSky();
-		}
-		// apply multiplier if the sunlight is not at maximum
-		if (sunlightIntensity < MAX_LIGHT_INTENSITY) {
+		Block up = block.getRelative(BlockFace.UP);
+		int sunIntensity = up.getLightFromSky();
+		if(ignoreForLight == null) {
 			rate *= notFullSunlightMultiplier;
 			if (needsSunlight) {
-				rate *= Math.pow((sunlightIntensity / MAX_LIGHT_INTENSITY), 3.0);
+				rate *= Math.pow((up.getLightFromSky() / MAX_LIGHT_INTENSITY), 3.0);
+			}
+		} else {
+			while(sunIntensity < MAX_LIGHT_INTENSITY) {
+				if(!ignoreForLight.contains(block.getType())) {
+					rate *= notFullSunlightMultiplier;
+					if (needsSunlight) {
+						rate *= Math.pow((up.getLightFromSky() / MAX_LIGHT_INTENSITY), 3.0);
+					}
+					break;
+				}
+				up = up.getRelative(BlockFace.UP);
 			}
 		}
 		return rate;

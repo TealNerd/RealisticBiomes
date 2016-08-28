@@ -10,8 +10,6 @@ realistic_biomes:
  persistence_enabled: true
  # Set to true if you want fishing_drops to _replace_ MC default instead of control.
  replace_fishing: false
- # Set to true if you want tapping a plant with bonemeal to double it.
- allow_tallplant_replication: true
 
  unload_batch_period: 100
  grow_event_load_chance: 0.1
@@ -23,6 +21,10 @@ realistic_biomes:
  log_db_production: true
  log_db_production_chunk_load_mintime: 5
  log_db_production_chunk_unload_mintime: 5
+ 
+ ignore_for_light:
+   - LEAVES
+   - LEAVES_2
 
 
  # catagories of biomes
@@ -325,6 +327,9 @@ realistic_biomes:
    needs_sunlight: true
    not_full_sunlight_multiplier: 0.125
    greenhouse_rate: 0.75
+   ignore_for_light:
+     - LEAVES
+     - LEAVES_2
    biomes:
     mushroom: 0.5
     freshwater: 0.5
@@ -610,3 +615,15 @@ realistic_biomes:
 #   base_rate: 0.25
 #    random_enchant: true
 #    treasure_enchant: true
+
+#Example for custom trees
+#currently cant do anything other than a single sapling tree, maybe in the future?
+#customtrees:
+#  bigoak:
+#    type: TREE
+#    lore: Make oak trees great again
+#    structure: bigoak.mbs
+#    overrides:
+#      - DIRT
+#      - GRASS
+#      - LEAVES:1
